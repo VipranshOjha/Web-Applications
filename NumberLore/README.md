@@ -6,7 +6,8 @@ From **prime numbers** to **palindromes**, **triangular numbers**, **happy numbe
 
 Think of it as a **numerical museum**, where every number has a story and every card reveals a mathematical surprise.
 
-Live link https://number-lore.vercel.app/ 
+🔗 Live Website: //number-lore.vercel.app/ 
+
 ---
 
 ## 🎯 Purpose  
