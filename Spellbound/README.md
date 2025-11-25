@@ -7,7 +7,6 @@ From **anagrams** to **tautonyms**, **lipograms**, **homophones**, **spoonerisms
 Think of it as a **museum of word magic**, with each card opening a delightful surprise.
 
 🔗 **Live Website:** https://spellbound-eight.vercel.app/  
-📁 **Repository:** https://github.com/VipranshOjha/Spellbound
 
 ---
 
@@ -91,10 +90,6 @@ cd Spellbound
 npm install
 npm run dev
 ```
-
-Then open:  
-👉 http://localhost:5173/
-
 ---
 
 ## 📸 Screenshots (Description-ready)  
@@ -129,16 +124,3 @@ This project helped me explore:
 It’s one of my most *joyful* builds — part dictionary, part game, part art.
 
 ---
-
-## 🧙 Future Enhancements  
-- 🔤 Add more word phenomena  
-- 🧪 Daily word challenges  
-- 🔊 Add sound effects for sound-based categories  
-- 📝 Export cards as images  
-- 🎮 Mini puzzles (drag to match, reorder letters, etc.)
-
----
-
-## ⭐ If you enjoyed the project  
-Please consider starring the repo!  
-It helps others discover it ✨
