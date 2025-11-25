@@ -4,7 +4,7 @@
 
 🔗 Live Website: https://prompt-craft-eight.vercel.app/
 
-💬 **The Problem**
+## 💬 **The Problem**
 When I used AI assistants like Gemini, ChatGPT, or Claude, I often had ideas in mind but struggled to phrase them as clear, detailed prompts.
 
 * If I wrote prompts casually → the AI gave vague or shallow results.
@@ -21,7 +21,7 @@ I needed a tool that could:
 
 ---
 
-✨ **The Solution**
+## ✨ **The Solution**
 That’s why I built **PromptCraft**.
 
 It’s a web app that takes your **raw idea** and instantly transforms it into a **professional-grade AI prompt** with structure, persona, and style.
@@ -34,7 +34,7 @@ Now, in seconds, I can go from *“an idea”* → *“an expert-level AI prompt
 
 ---
 
-🚀 **Features**
+## 🚀 **Features**
 
 * 🎯 **Precision Prompting** → vague ideas become structured, professional briefs
 * 🔧 **Multi-Purpose Modes** → Coding, Story/Text, Academic, Presentation, Research, Image
@@ -47,7 +47,7 @@ Now, in seconds, I can go from *“an idea”* → *“an expert-level AI prompt
 
 ---
 
-🛠️ **Tech Stack**
+## 🛠️ **Tech Stack**
 
 * **Frontend** → HTML, CSS, Vanilla JavaScript
 * **Backend** → Python (Flask + Flask-CORS)
