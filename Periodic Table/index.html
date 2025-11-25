@@ -3,28 +3,768 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="./style.css">
-    <script src="./script.js" defer></script>
-    <title>Document</title>
+    <title>Modern Periodic Table</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #e0eafc, #cfdef3);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #2c3e50;
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Table Styles */
+        .table-container {
+            overflow-x: auto;
+            margin-bottom: 30px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 2px;
+            background: transparent;
+        }
+
+        td {
+            width: 60px;
+            height: 60px;
+            font-weight: bold;
+            color: #000;
+            vertical-align: middle;
+            text-align: center;
+            font-size: 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            border: 2px solid transparent;
+        }
+
+        td:not(:empty):hover {
+            transform: scale(1.15);
+            z-index: 10;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            border-color: #fff;
+        }
+
+        td.dimmed {
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        /* Element Colors - New Muted & Vibrant Palette */
+        .alkali-metal { background: linear-gradient(135deg, #FF6666, #FF8080); }
+        .alkaline-earth-metal { background: linear-gradient(135deg, #FFD54F, #FFECB3); }
+        .transition-metal { background: linear-gradient(135deg, #4DD0E1, #B2EBF2); }
+        .post-transition-metal { background: linear-gradient(135deg, #A1887F, #BCAAA4); }
+        .metalloid { background: linear-gradient(135deg, #81C784, #A5D6A7); }
+        .nonmetal { background: linear-gradient(135deg, #9575CD, #B39DDB); }
+        .halogen { background: linear-gradient(135deg, #FFB74D, #FFCC80); }
+        .noble-gas { background: linear-gradient(135deg, #DCE775, #E6EE9C); }
+        .lanthanides { background: linear-gradient(135deg, #F06292, #F48FB1); }
+        .actinides { background: linear-gradient(135deg, #00BFA5, #26A69A); }
+        .undefined { background: linear-gradient(135deg, #B0BEC5, #CFD8DC); }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+            margin: 5% auto;
+            padding: 0;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+            animation: modalSlideIn 0.3s ease;
+            overflow: hidden;
+            position: relative;
+        }
+
+        @keyframes modalSlideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            color: white;
+            padding: 25px 30px;
+            position: relative;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+        
+        .modal-header h2 .element-symbol {
+            font-size: 4rem;
+            font-weight: 900;
+            opacity: 0.3;
+            position: absolute;
+            right: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .close {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            transition: background 0.3s ease;
+        }
+
+        .close:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .element-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .info-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .info-section h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .info-value {
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        /* Legend Styles - New Muted & Vibrant Palette */
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .legend-item {
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            user-select: none;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white; /* Ensure text is readable */
+        }
+        /* Make sure some colors are dark for better contrast */
+        .legend-item.alkaline-earth-metal, .legend-item.nonmetal, .legend-item.noble-gas {
+            color: #2c3e50;
+        }
+
+        .legend-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .legend-item:hover::before {
+            left: 100%;
+        }
+
+        .legend-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .legend-item.active {
+            border-color: #2c3e50;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            transform: scale(1.05);
+        }
+
+        /* Apply same colors as elements */
+        .legend-item.alkali-metal { background: linear-gradient(135deg, #FF6666, #FF8080); }
+        .legend-item.alkaline-earth-metal { background: linear-gradient(135deg, #FFD54F, #FFECB3); }
+        .legend-item.transition-metal { background: linear-gradient(135deg, #4DD0E1, #B2EBF2); }
+        .legend-item.post-transition-metal { background: linear-gradient(135deg, #A1887F, #BCAAA4); }
+        .legend-item.metalloid { background: linear-gradient(135deg, #81C784, #A5D6A7); }
+        .legend-item.nonmetal { background: linear-gradient(135deg, #9575CD, #B39DDB); }
+        .legend-item.halogen { background: linear-gradient(135deg, #FFB74D, #FFCC80); }
+        .legend-item.noble-gas { background: linear-gradient(135deg, #DCE775, #E6EE9C); }
+        .legend-item.lanthanides { background: linear-gradient(135deg, #F06292, #F48FB1); }
+        .legend-item.actinides { background: linear-gradient(135deg, #00BFA5, #26A69A); }
+        .legend-item.undefined { background: linear-gradient(135deg, #B0BEC5, #CFD8DC); }
+
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+                margin-bottom: 20px;
+            }
+
+            td {
+                width: 40px;
+                height: 40px;
+                font-size: 12px;
+            }
+
+            .modal-content {
+                margin: 10% auto;
+                width: 95%;
+            }
+
+            .modal-header {
+                padding: 20px;
+            }
+
+            .modal-header h2 {
+                font-size: 1.5rem;
+            }
+
+            .modal-header .element-symbol {
+                font-size: 3rem;
+                right: 20px;
+            }
+
+            .modal-body {
+                padding: 20px;
+            }
+
+            .element-info-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .legend-item {
+                padding: 8px 16px;
+                font-size: 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            td {
+                width: 35px;
+                height: 35px;
+                font-size: 10px;
+            }
+
+            .legend {
+                gap: 8px;
+            }
+
+            .legend-item {
+                padding: 6px 12px;
+                font-size: 11px;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
 </head>
 <body>
-    <h1 style="text-align:center; margin: 24px 0 16px 0;">Modern Periodic Table of Elements</h1>
-    <table id="periodic-table"></table>
-    <div id="main-div" class="hidden" onclick="showDetails()">
-        <div id="detailDiv"></div>
+    <div class="container">
+        <h1>Modern Periodic Table of Elements</h1>
+        
+        <div class="table-container">
+            <table id="periodic-table"></table>
+        </div>
+
+        <div class="legend" id="legend">
+            <div class="legend-item alkali-metal" data-family="alkali-metal">Alkali Metals</div>
+            <div class="legend-item alkaline-earth-metal" data-family="alkaline-earth-metal">Alkaline Earth</div>
+            <div class="legend-item transition-metal" data-family="transition-metal">Transition Metals</div>
+            <div class="legend-item post-transition-metal" data-family="post-transition-metal">Post-Transition</div>
+            <div class="legend-item metalloid" data-family="metalloid">Metalloids</div>
+            <div class="legend-item nonmetal" data-family="nonmetal">Non-metals</div>
+            <div class="legend-item halogen" data-family="halogen">Halogens</div>
+            <div class="legend-item noble-gas" data-family="noble-gas">Noble Gases</div>
+            <div class="legend-item lanthanides" data-family="lanthanides">Lanthanides</div>
+            <div class="legend-item actinides" data-family="actinides">Actinides</div>
+            <div class="legend-item undefined" data-family="undefined">Unknown</div>
+        </div>
     </div>
-    <div id="legend">
-        <span class="legend-item alkali-metal">Alkali metals</span>
-        <span class="legend-item alkaline-earth-metal">Alkaline earth metals</span>
-        <span class="legend-item transition-metal">Transition metals</span>
-        <span class="legend-item post-transition-metal">Post-transition metals</span>
-        <span class="legend-item metalloid">Metalloids</span>
-        <span class="legend-item nonmetal">Reactive non-metals</span>
-        <span class="legend-item halogen">Halogens</span>
-        <span class="legend-item noble-gas">Noble gases</span>
-        <span class="legend-item lanthanides">Lanthanides</span>
-        <span class="legend-item actinides">Actinides</span>
-        <span class="legend-item undefined">Unknown properties</span>
+
+    <!-- Modal -->
+    <div id="elementModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button class="close">&times;</button>
+                <h2 id="modalTitle">Element Name</h2>
+            </div>
+            <div class="modal-body">
+                <div class="element-info-grid">
+                    <div class="info-section">
+                        <h3>Basic Properties</h3>
+                        <div class="info-item">
+                            <span class="info-label">Atomic Number:</span>
+                            <span class="info-value" id="atomicNumber">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Atomic Mass:</span>
+                            <span class="info-value" id="atomicMass">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Group:</span>
+                            <span class="info-value" id="group">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Period:</span>
+                            <span class="info-value" id="period">-</span>
+                        </div>
+                    </div>
+                    
+                    <div class="info-section">
+                        <h3>Classification</h3>
+                        <div class="info-item">
+                            <span class="info-label">Family:</span>
+                            <span class="info-value" id="family">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">State at RT:</span>
+                            <span class="info-value" id="state">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Configuration:</span>
+                            <span class="info-value" id="electronConfig">-</span>
+                        </div>
+                    </div>
+                    
+                    <div class="info-section">
+                        <h3>Physical Properties</h3>
+                        <div class="info-item">
+                            <span class="info-label">Melting Point:</span>
+                            <span class="info-value" id="meltingPoint">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Boiling Point:</span>
+                            <span class="info-value" id="boilingPoint">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Electronegativity:</span>
+                            <span class="info-value" id="electronegativity">-</span>
+                        </div>
+                    </div>
+                    
+                    <div class="info-section">
+                        <h3>Discovery</h3>
+                        <div class="info-item">
+                            <span class="info-label">Discovered:</span>
+                            <span class="info-value" id="yearDiscovered">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Discoverer:</span>
+                            <span class="info-value" id="discoverer">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+
+    <script>
+        const elementData = {
+            'H': { atomicNumber: 1, symbol: 'H', name: 'Hydrogen', atomicMass: '1.008', group: 1, period: 1, family: 'Nonmetal', state: 'Gas', electronConfig: '1s¹', meltingPoint: '-259°C', boilingPoint: '-253°C', electronegativity: '2.20', yearDiscovered: '1766', discoverer: 'Henry Cavendish', x: 1, y: 1 },
+            'He': { atomicNumber: 2, symbol: 'He', name: 'Helium', atomicMass: '4.003', group: 18, period: 1, family: 'Noble-gas', state: 'Gas', electronConfig: '1s²', meltingPoint: '-272°C', boilingPoint: '-269°C', electronegativity: 'N/A', yearDiscovered: '1895', discoverer: 'William Ramsay', x: 18, y: 1 },
+            'Li': { atomicNumber: 3, symbol: 'Li', name: 'Lithium', atomicMass: '6.941', group: 1, period: 2, family: 'Alkali-metal', state: 'Solid', electronConfig: '[He] 2s¹', meltingPoint: '180°C', boilingPoint: '1342°C', electronegativity: '0.98', yearDiscovered: '1817', discoverer: 'Johan August Arfwedson', x: 1, y: 2 },
+            'Be': { atomicNumber: 4, symbol: 'Be', name: 'Beryllium', atomicMass: '9.012', group: 2, period: 2, family: 'Alkaline-earth-metal', state: 'Solid', electronConfig: '[He] 2s²', meltingPoint: '1287°C', boilingPoint: '2470°C', electronegativity: '1.57', yearDiscovered: '1798', discoverer: 'Louis-Nicolas Vauquelin', x: 2, y: 2 },
+            'B': { atomicNumber: 5, symbol: 'B', name: 'Boron', atomicMass: '10.811', group: 13, period: 2, family: 'Metalloid', state: 'Solid', electronConfig: '[He] 2s² 2p¹', meltingPoint: '2075°C', boilingPoint: '4000°C', electronegativity: '2.04', yearDiscovered: '1808', discoverer: 'Joseph Louis Gay-Lussac', x: 13, y: 2 },
+            'C': { atomicNumber: 6, symbol: 'C', name: 'Carbon', atomicMass: '12.011', group: 14, period: 2, family: 'Nonmetal', state: 'Solid', electronConfig: '[He] 2s² 2p²', meltingPoint: '3550°C', boilingPoint: '4827°C', electronegativity: '2.55', yearDiscovered: 'Ancient', discoverer: 'Known to ancients', x: 14, y: 2 },
+            'N': { atomicNumber: 7, symbol: 'N', name: 'Nitrogen', atomicMass: '14.007', group: 15, period: 2, family: 'Nonmetal', state: 'Gas', electronConfig: '[He] 2s² 2p³', meltingPoint: '-210°C', boilingPoint: '-196°C', electronegativity: '3.04', yearDiscovered: '1772', discoverer: 'Daniel Rutherford', x: 15, y: 2 },
+            'O': { atomicNumber: 8, symbol: 'O', name: 'Oxygen', atomicMass: '15.999', group: 16, period: 2, family: 'Nonmetal', state: 'Gas', electronConfig: '[He] 2s² 2p⁴', meltingPoint: '-218°C', boilingPoint: '-183°C', electronegativity: '3.44', yearDiscovered: '1774', discoverer: 'Joseph Priestley', x: 16, y: 2 },
+            'F': { atomicNumber: 9, symbol: 'F', name: 'Fluorine', atomicMass: '18.998', group: 17, period: 2, family: 'Halogen', state: 'Gas', electronConfig: '[He] 2s² 2p⁵', meltingPoint: '-220°C', boilingPoint: '-188°C', electronegativity: '3.98', yearDiscovered: '1886', discoverer: 'Henri Moissan', x: 17, y: 2 },
+            'Ne': { atomicNumber: 10, symbol: 'Ne', name: 'Neon', atomicMass: '20.180', group: 18, period: 2, family: 'Noble-gas', state: 'Gas', electronConfig: '[He] 2s² 2p⁶', meltingPoint: '-249°C', boilingPoint: '-246°C', electronegativity: 'N/A', yearDiscovered: '1898', discoverer: 'William Ramsay', x: 18, y: 2 },
+            'Na': { atomicNumber: 11, symbol: 'Na', name: 'Sodium', atomicMass: '22.990', group: 1, period: 3, family: 'Alkali-metal', state: 'Solid', electronConfig: '[Ne] 3s¹', meltingPoint: '98°C', boilingPoint: '883°C', electronegativity: '0.93', yearDiscovered: '1807', discoverer: 'Humphry Davy', x: 1, y: 3 },
+            'Mg': { atomicNumber: 12, symbol: 'Mg', name: 'Magnesium', atomicMass: '24.305', group: 2, period: 3, family: 'Alkaline-earth-metal', state: 'Solid', electronConfig: '[Ne] 3s²', meltingPoint: '650°C', boilingPoint: '1090°C', electronegativity: '1.31', yearDiscovered: '1808', discoverer: 'Humphry Davy', x: 2, y: 3 },
+            'Al': { atomicNumber: 13, symbol: 'Al', name: 'Aluminum', atomicMass: '26.982', group: 13, period: 3, family: 'Post-transition-metal', state: 'Solid', electronConfig: '[Ne] 3s² 3p¹', meltingPoint: '660°C', boilingPoint: '2519°C', electronegativity: '1.61', yearDiscovered: '1825', discoverer: 'Hans Christian Ørsted', x: 13, y: 3 },
+            'Si': { atomicNumber: 14, symbol: 'Si', name: 'Silicon', atomicMass: '28.086', group: 14, period: 3, family: 'Metalloid', state: 'Solid', electronConfig: '[Ne] 3s² 3p²', meltingPoint: '1414°C', boilingPoint: '3265°C', electronegativity: '1.90', yearDiscovered: '1824', discoverer: 'Jöns Jacob Berzelius', x: 14, y: 3 },
+            'P': { atomicNumber: 15, symbol: 'P', name: 'Phosphorus', atomicMass: '30.974', group: 15, period: 3, family: 'Nonmetal', state: 'Solid', electronConfig: '[Ne] 3s² 3p³', meltingPoint: '44°C', boilingPoint: '277°C', electronegativity: '2.19', yearDiscovered: '1669', discoverer: 'Hennig Brand', x: 15, y: 3 },
+            'S': { atomicNumber: 16, symbol: 'S', name: 'Sulfur', atomicMass: '32.065', group: 16, period: 3, family: 'Nonmetal', state: 'Solid', electronConfig: '[Ne] 3s² 3p⁴', meltingPoint: '115°C', boilingPoint: '445°C', electronegativity: '2.58', yearDiscovered: 'Ancient', discoverer: 'Known to ancients', x: 16, y: 3 },
+            'Cl': { atomicNumber: 17, symbol: 'Cl', name: 'Chlorine', atomicMass: '35.453', group: 17, period: 3, family: 'Halogen', state: 'Gas', electronConfig: '[Ne] 3s² 3p⁵', meltingPoint: '-102°C', boilingPoint: '-34°C', electronegativity: '3.16', yearDiscovered: '1774', discoverer: 'Carl Wilhelm Scheele', x: 17, y: 3 },
+            'Ar': { atomicNumber: 18, symbol: 'Ar', name: 'Argon', atomicMass: '39.948', group: 18, period: 3, family: 'Noble-gas', state: 'Gas', electronConfig: '[Ne] 3s² 3p⁶', meltingPoint: '-189°C', boilingPoint: '-186°C', electronegativity: 'N/A', yearDiscovered: '1894', discoverer: 'Lord Rayleigh', x: 18, y: 3 },
+            'K': { atomicNumber: 19, symbol: 'K', name: 'Potassium', atomicMass: '39.098', group: 1, period: 4, family: 'Alkali-metal', state: 'Solid', electronConfig: '[Ar] 4s¹', meltingPoint: '64°C', boilingPoint: '759°C', electronegativity: '0.82', yearDiscovered: '1807', discoverer: 'Humphry Davy', x: 1, y: 4 },
+            'Ca': { atomicNumber: 20, symbol: 'Ca', name: 'Calcium', atomicMass: '40.078', group: 2, period: 4, family: 'Alkaline-earth-metal', state: 'Solid', electronConfig: '[Ar] 4s²', meltingPoint: '842°C', boilingPoint: '1484°C', electronegativity: '1.00', yearDiscovered: '1808', discoverer: 'Humphry Davy', x: 2, y: 4 },
+            'Sc': { atomicNumber: 21, symbol: 'Sc', name: 'Scandium', atomicMass: '44.956', group: 3, period: 4, family: 'Transition-metal', state: 'Solid', electronConfig: '[Ar] 3d¹ 4s²', meltingPoint: '1541°C', boilingPoint: '2836°C', electronegativity: '1.36', yearDiscovered: '1879', discoverer: 'Lars Fredrik Nilson', x: 3, y: 4 },
+            'Ti': { atomicNumber: 22, symbol: 'Ti', name: 'Titanium', atomicMass: '47.867', group: 4, period: 4, family: 'Transition-metal', state: 'Solid', electronConfig: '[Ar] 3d² 4s²', meltingPoint: '1668°C', boilingPoint: '3287°C', electronegativity: '1.54', yearDiscovered: '1791', discoverer: 'William Gregor', x: 4, y: 4 },
+            'V': { atomicNumber: 23, symbol: 'V', name: 'Vanadium', atomicMass: '50.942', group: 5, period: 4, family: 'Transition-metal', state: 'Solid', electronConfig: '[Ar] 3d³ 4s²', meltingPoint: '1910°C', boilingPoint: '3407°C', electronegativity: '1.63', yearDiscovered: '1831', discoverer: 'Nils Gabriel Sefström', x: 5, y: 4 },
+            'Cr': { atomicNumber: 24, symbol: 'Cr', name: 'Chromium', atomicMass: '51.996', group: 6, period: 4, family: 'Transition-metal', state: 'Solid', electronConfig: '[Ar] 3d⁵ 4s¹', meltingPoint: '1857°C', boilingPoint: '2672°C', electronegativity: '1.66', yearDiscovered: '1797', discoverer: 'Louis Nicolas Vauquelin', x: 6, y: 4 },
+            'Mn': { atomicNumber: 25, symbol: 'Mn', name: 'Manganese', atomicMass: '54.938', group: 7, period: 4, family: 'Transition-metal', state: 'Solid', electronConfig: '[Ar] 3d⁵ 4s²', meltingPoint: '1246°C', boilingPoint: '2061°C', electronegativity: '1.55', yearDiscovered: '1774', discoverer: 'Johan Gottlieb Gahn', x: 7, y: 4 },
+            'Fe': { atomicNumber: 26, symbol: 'Fe', name: 'Iron', atomicMass: '55.845', group: 8, period: 4, family: 'Transition-metal', state: 'Solid', electronConfig: '[Ar] 3d⁶ 4s²', meltingPoint: '1538°C', boilingPoint: '2861°C', electronegativity: '1.83', yearDiscovered: 'Ancient', discoverer: 'Known to ancients', x: 8, y: 4 },
+            'Co': { atomicNumber: 27, symbol: 'Co', name: 'Cobalt', atomicMass: '58.933', group: 9, period: 4, family: 'Transition-metal', state: 'Solid', electronConfig: '[Ar] 3d⁷ 4s²', meltingPoint: '1495°C', boilingPoint: '2927°C', electronegativity: '1.88', yearDiscovered: '1735', discoverer: 'Georg Brandt', x: 9, y: 4 },
+            'Ni': { atomicNumber: 28, symbol: 'Ni', name: 'Nickel', atomicMass: '58.693', group: 10, period: 4, family: 'Transition-metal', state: 'Solid', electronConfig: '[Ar] 3d⁸ 4s²', meltingPoint: '1455°C', boilingPoint: '2913°C', electronegativity: '1.91', yearDiscovered: '1751', discoverer: 'Axel Fredrik Cronstedt', x: 10, y: 4 },
+            'Cu': { atomicNumber: 29, symbol: 'Cu', name: 'Copper', atomicMass: '63.546', group: 11, period: 4, family: 'Transition-metal', state: 'Solid', electronConfig: '[Ar] 3d¹⁰ 4s¹', meltingPoint: '1085°C', boilingPoint: '2562°C', electronegativity: '1.90', yearDiscovered: 'Ancient', discoverer: 'Known to ancients', x: 11, y: 4 },
+            'Zn': { atomicNumber: 30, symbol: 'Zn', name: 'Zinc', atomicMass: '65.38', group: 12, period: 4, family: 'Transition-metal', state: 'Solid', electronConfig: '[Ar] 3d¹⁰ 4s²', meltingPoint: '420°C', boilingPoint: '907°C', electronegativity: '1.65', yearDiscovered: 'Ancient', discoverer: 'Known to ancients', x: 12, y: 4 },
+            'Ga': { atomicNumber: 31, symbol: 'Ga', name: 'Gallium', atomicMass: '69.723', group: 13, period: 4, family: 'Post-transition-metal', state: 'Solid', electronConfig: '[Ar] 3d¹⁰ 4s² 4p¹', meltingPoint: '30°C', boilingPoint: '2403°C', electronegativity: '1.81', yearDiscovered: '1875', discoverer: 'Paul-Émile Lecoq de Boisbaudran', x: 13, y: 4 },
+            'Ge': { atomicNumber: 32, symbol: 'Ge', name: 'Germanium', atomicMass: '72.630', group: 14, period: 4, family: 'Metalloid', state: 'Solid', electronConfig: '[Ar] 3d¹⁰ 4s² 4p²', meltingPoint: '939°C', boilingPoint: '2833°C', electronegativity: '2.01', yearDiscovered: '1886', discoverer: 'Clemens Winkler', x: 14, y: 4 },
+            'As': { atomicNumber: 33, symbol: 'As', name: 'Arsenic', atomicMass: '74.922', group: 15, period: 4, family: 'Metalloid', state: 'Solid', electronConfig: '[Ar] 3d¹⁰ 4s² 4p³', meltingPoint: '817°C', boilingPoint: '614°C', electronegativity: '2.18', yearDiscovered: '1250', discoverer: 'Albertus Magnus', x: 15, y: 4 },
+            'Se': { atomicNumber: 34, symbol: 'Se', name: 'Selenium', atomicMass: '78.971', group: 16, period: 4, family: 'Nonmetal', state: 'Solid', electronConfig: '[Ar] 3d¹⁰ 4s² 4p⁴', meltingPoint: '221°C', boilingPoint: '685°C', electronegativity: '2.55', yearDiscovered: '1817', discoverer: 'Jöns Jacob Berzelius', x: 16, y: 4 },
+            'Br': { atomicNumber: 35, symbol: 'Br', name: 'Bromine', atomicMass: '79.904', group: 17, period: 4, family: 'Nonmetal', state: 'Liquid', electronConfig: '[Ar] 3d¹⁰ 4s² 4p⁵', meltingPoint: '-7°C', boilingPoint: '59°C', electronegativity: '2.96', yearDiscovered: '1826', discoverer: 'Antoine Jérôme Balard', x: 17, y: 4 },
+            'Kr': { atomicNumber: 36, symbol: 'Kr', name: 'Krypton', atomicMass: '83.798', group: 18, period: 4, family: 'Noble-gas', state: 'Gas', electronConfig: '[Ar] 3d¹⁰ 4s² 4p⁶', meltingPoint: '-157°C', boilingPoint: '-153°C', electronegativity: '3.00', yearDiscovered: '1898', discoverer: 'William Ramsay', x: 18, y: 4 },
+            'Rb': { atomicNumber: 37, symbol: 'Rb', name: 'Rubidium', atomicMass: '85.468', group: 1, period: 5, family: 'Alkali-metal', state: 'Solid', electronConfig: '[Kr] 5s¹', meltingPoint: '39°C', boilingPoint: '688°C', electronegativity: '0.82', yearDiscovered: '1861', discoverer: 'Robert Bunsen', x: 1, y: 5 },
+            'Sr': { atomicNumber: 38, symbol: 'Sr', name: 'Strontium', atomicMass: '87.62', group: 2, period: 5, family: 'Alkaline-earth-metal', state: 'Solid', electronConfig: '[Kr] 5s²', meltingPoint: '777°C', boilingPoint: '1382°C', electronegativity: '0.95', yearDiscovered: '1790', discoverer: 'Adair Crawford', x: 2, y: 5 },
+            'Y': { atomicNumber: 39, symbol: 'Y', name: 'Yttrium', atomicMass: '88.906', group: 3, period: 5, family: 'Transition-metal', state: 'Solid', electronConfig: '[Kr] 4d¹ 5s²', meltingPoint: '1522°C', boilingPoint: '3338°C', electronegativity: '1.22', yearDiscovered: '1794', discoverer: 'Johan Gadolin', x: 3, y: 5 },
+            'Zr': { atomicNumber: 40, symbol: 'Zr', name: 'Zirconium', atomicMass: '91.224', group: 4, period: 5, family: 'Transition-metal', state: 'Solid', electronConfig: '[Kr] 4d² 5s²', meltingPoint: '1855°C', boilingPoint: '4409°C', electronegativity: '1.33', yearDiscovered: '1789', discoverer: 'Martin Heinrich Klaproth', x: 4, y: 5 },
+            'Nb': { atomicNumber: 41, symbol: 'Nb', name: 'Niobium', atomicMass: '92.906', group: 5, period: 5, family: 'Transition-metal', state: 'Solid', electronConfig: '[Kr] 4d⁴ 5s¹', meltingPoint: '2477°C', boilingPoint: '4744°C', electronegativity: '1.60', yearDiscovered: '1801', discoverer: 'Charles Hatchett', x: 5, y: 5 },
+            'Mo': { atomicNumber: 42, symbol: 'Mo', name: 'Molybdenum', atomicMass: '95.95', group: 6, period: 5, family: 'Transition-metal', state: 'Solid', electronConfig: '[Kr] 4d⁵ 5s¹', meltingPoint: '2623°C', boilingPoint: '4639°C', electronegativity: '2.16', yearDiscovered: '1778', discoverer: 'Carl Wilhelm Scheele', x: 6, y: 5 },
+            'Tc': { atomicNumber: 43, symbol: 'Tc', name: 'Technetium', atomicMass: '(98)', group: 7, period: 5, family: 'Transition-metal', state: 'Solid', electronConfig: '[Kr] 4d⁵ 5s²', meltingPoint: '2157°C', boilingPoint: '4265°C', electronegativity: '1.90', yearDiscovered: '1937', discoverer: 'Carlo Perrier and Emilio Segrè', x: 7, y: 5 },
+            'Ru': { atomicNumber: 44, symbol: 'Ru', name: 'Ruthenium', atomicMass: '101.07', group: 8, period: 5, family: 'Transition-metal', state: 'Solid', electronConfig: '[Kr] 4d⁷ 5s¹', meltingPoint: '2334°C', boilingPoint: '4150°C', electronegativity: '2.20', yearDiscovered: '1844', discoverer: 'Karl Ernst Claus', x: 8, y: 5 },
+            'Rh': { atomicNumber: 45, symbol: 'Rh', name: 'Rhodium', atomicMass: '102.906', group: 9, period: 5, family: 'Transition-metal', state: 'Solid', electronConfig: '[Kr] 4d⁸ 5s¹', meltingPoint: '1964°C', boilingPoint: '3695°C', electronegativity: '2.28', yearDiscovered: '1803', discoverer: 'William Hyde Wollaston', x: 9, y: 5 },
+            'Pd': { atomicNumber: 46, symbol: 'Pd', name: 'Palladium', atomicMass: '106.42', group: 10, period: 5, family: 'Transition-metal', state: 'Solid', electronConfig: '[Kr] 4d¹⁰', meltingPoint: '1555°C', boilingPoint: '2963°C', electronegativity: '2.20', yearDiscovered: '1803', discoverer: 'William Hyde Wollaston', x: 10, y: 5 },
+            'Ag': { atomicNumber: 47, symbol: 'Ag', name: 'Silver', atomicMass: '107.868', group: 11, period: 5, family: 'Transition-metal', state: 'Solid', electronConfig: '[Kr] 4d¹⁰ 5s¹', meltingPoint: '962°C', boilingPoint: '2162°C', electronegativity: '1.93', yearDiscovered: 'Ancient', discoverer: 'Known to ancients', x: 11, y: 5 },
+            'Cd': { atomicNumber: 48, symbol: 'Cd', name: 'Cadmium', atomicMass: '112.414', group: 12, period: 5, family: 'Transition-metal', state: 'Solid', electronConfig: '[Kr] 4d¹⁰ 5s²', meltingPoint: '321°C', boilingPoint: '767°C', electronegativity: '1.69', yearDiscovered: '1817', discoverer: 'Friedrich Stromeyer', x: 12, y: 5 },
+            'In': { atomicNumber: 49, symbol: 'In', name: 'Indium', atomicMass: '114.818', group: 13, period: 5, family: 'Post-transition-metal', state: 'Solid', electronConfig: '[Kr] 4d¹⁰ 5s² 5p¹', meltingPoint: '157°C', boilingPoint: '2072°C', electronegativity: '1.78', yearDiscovered: '1863', discoverer: 'Ferdinand Reich and Hieronymus Richter', x: 13, y: 5 },
+            'Sn': { atomicNumber: 50, symbol: 'Sn', name: 'Tin', atomicMass: '118.710', group: 14, period: 5, family: 'Post-transition-metal', state: 'Solid', electronConfig: '[Kr] 4d¹⁰ 5s² 5p²', meltingPoint: '232°C', boilingPoint: '2602°C', electronegativity: '1.96', yearDiscovered: 'Ancient', discoverer: 'Known to ancients', x: 14, y: 5 },
+            'Sb': { atomicNumber: 51, symbol: 'Sb', name: 'Antimony', atomicMass: '121.760', group: 15, period: 5, family: 'Metalloid', state: 'Solid', electronConfig: '[Kr] 4d¹⁰ 5s² 5p³', meltingPoint: '631°C', boilingPoint: '1587°C', electronegativity: '2.05', yearDiscovered: 'Ancient', discoverer: 'Known to ancients', x: 15, y: 5 },
+            'Te': { atomicNumber: 52, symbol: 'Te', name: 'Tellurium', atomicMass: '127.60', group: 16, period: 5, family: 'Metalloid', state: 'Solid', electronConfig: '[Kr] 4d¹⁰ 5s² 5p⁴', meltingPoint: '450°C', boilingPoint: '988°C', electronegativity: '2.10', yearDiscovered: '1783', discoverer: 'Franz-Joseph Müller von Reichenstein', x: 16, y: 5 },
+            'I': { atomicNumber: 53, symbol: 'I', name: 'Iodine', atomicMass: '126.904', group: 17, period: 5, family: 'Nonmetal', state: 'Solid', electronConfig: '[Kr] 4d¹⁰ 5s² 5p⁵', meltingPoint: '114°C', boilingPoint: '184°C', electronegativity: '2.66', yearDiscovered: '1811', discoverer: 'Bernard Courtois', x: 17, y: 5 },
+            'Xe': { atomicNumber: 54, symbol: 'Xe', name: 'Xenon', atomicMass: '131.293', group: 18, period: 5, family: 'Noble-gas', state: 'Gas', electronConfig: '[Kr] 4d¹⁰ 5s² 5p⁶', meltingPoint: '-112°C', boilingPoint: '-108°C', electronegativity: '2.60', yearDiscovered: '1898', discoverer: 'William Ramsay', x: 18, y: 5 },
+            'Cs': { atomicNumber: 55, symbol: 'Cs', name: 'Cesium', atomicMass: '132.905', group: 1, period: 6, family: 'Alkali-metal', state: 'Solid', electronConfig: '[Xe] 6s¹', meltingPoint: '28°C', boilingPoint: '671°C', electronegativity: '0.79', yearDiscovered: '1860', discoverer: 'Robert Bunsen', x: 1, y: 6 },
+            'Ba': { atomicNumber: 56, symbol: 'Ba', name: 'Barium', atomicMass: '137.327', group: 2, period: 6, family: 'Alkaline-earth-metal', state: 'Solid', electronConfig: '[Xe] 6s²', meltingPoint: '727°C', boilingPoint: '1897°C', electronegativity: '0.89', yearDiscovered: '1808', discoverer: 'Humphry Davy', x: 2, y: 6 },
+            'Lu': { atomicNumber: '57-71', symbol: '*', name: 'Lanthanides', family: 'Lanthanides', x: 3, y: 6 },
+            'Hf': { atomicNumber: 72, symbol: 'Hf', name: 'Hafnium', atomicMass: '178.49', group: 4, period: 6, family: 'Transition-metal', state: 'Solid', electronConfig: '[Xe] 4f¹⁴ 5d² 6s²', meltingPoint: '2233°C', boilingPoint: '4603°C', electronegativity: '1.30', yearDiscovered: '1923', discoverer: 'Dirk Coster and George de Hevesy', x: 4, y: 6 },
+            'Ta': { atomicNumber: 73, symbol: 'Ta', name: 'Tantalum', atomicMass: '180.948', group: 5, period: 6, family: 'Transition-metal', state: 'Solid', electronConfig: '[Xe] 4f¹⁴ 5d³ 6s²', meltingPoint: '3017°C', boilingPoint: '5458°C', electronegativity: '1.50', yearDiscovered: '1802', discoverer: 'Anders Gustaf Ekeberg', x: 5, y: 6 },
+            'W': { atomicNumber: 74, symbol: 'W', name: 'Tungsten', atomicMass: '183.84', group: 6, period: 6, family: 'Transition-metal', state: 'Solid', electronConfig: '[Xe] 4f¹⁴ 5d⁴ 6s²', meltingPoint: '3422°C', boilingPoint: '5930°C', electronegativity: '2.36', yearDiscovered: '1781', discoverer: 'Juan José and Fausto Elhuyar', x: 6, y: 6 },
+            'Re': { atomicNumber: 75, symbol: 'Re', name: 'Rhenium', atomicMass: '186.207', group: 7, period: 6, family: 'Transition-metal', state: 'Solid', electronConfig: '[Xe] 4f¹⁴ 5d⁵ 6s²', meltingPoint: '3186°C', boilingPoint: '5596°C', electronegativity: '1.90', yearDiscovered: '1925', discoverer: 'Walter Noddack', x: 7, y: 6 },
+            'Os': { atomicNumber: 76, symbol: 'Os', name: 'Osmium', atomicMass: '190.23', group: 8, period: 6, family: 'Transition-metal', state: 'Solid', electronConfig: '[Xe] 4f¹⁴ 5d⁶ 6s²', meltingPoint: '3033°C', boilingPoint: '5012°C', electronegativity: '2.20', yearDiscovered: '1803', discoverer: 'Smithson Tennant', x: 8, y: 6 },
+            'Ir': { atomicNumber: 77, symbol: 'Ir', name: 'Iridium', atomicMass: '192.217', group: 9, period: 6, family: 'Transition-metal', state: 'Solid', electronConfig: '[Xe] 4f¹⁴ 5d⁷ 6s²', meltingPoint: '2446°C', boilingPoint: '4428°C', electronegativity: '2.20', yearDiscovered: '1803', discoverer: 'Smithson Tennant', x: 9, y: 6 },
+            'Pt': { atomicNumber: 78, symbol: 'Pt', name: 'Platinum', atomicMass: '195.084', group: 10, period: 6, family: 'Transition-metal', state: 'Solid', electronConfig: '[Xe] 4f¹⁴ 5d⁹ 6s¹', meltingPoint: '1768°C', boilingPoint: '3825°C', electronegativity: '2.28', yearDiscovered: 'Ancient', discoverer: 'Known to ancients', x: 10, y: 6 },
+            'Au': { atomicNumber: 79, symbol: 'Au', name: 'Gold', atomicMass: '196.967', group: 11, period: 6, family: 'Transition-metal', state: 'Solid', electronConfig: '[Xe] 4f¹⁴ 5d¹⁰ 6s¹', meltingPoint: '1064°C', boilingPoint: '2856°C', electronegativity: '2.54', yearDiscovered: 'Ancient', discoverer: 'Known to ancients', x: 11, y: 6 },
+            'Hg': { atomicNumber: 80, symbol: 'Hg', name: 'Mercury', atomicMass: '200.592', group: 12, period: 6, family: 'Transition-metal', state: 'Liquid', electronConfig: '[Xe] 4f¹⁴ 5d¹⁰ 6s²', meltingPoint: '-39°C', boilingPoint: '357°C', electronegativity: '2.00', yearDiscovered: 'Ancient', discoverer: 'Known to ancients', x: 12, y: 6 },
+            'Tl': { atomicNumber: 81, symbol: 'Tl', name: 'Thallium', atomicMass: '204.383', group: 13, period: 6, family: 'Post-transition-metal', state: 'Solid', electronConfig: '[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p¹', meltingPoint: '304°C', boilingPoint: '1473°C', electronegativity: '1.62', yearDiscovered: '1861', discoverer: 'William Crookes', x: 13, y: 6 },
+            'Pb': { atomicNumber: 82, symbol: 'Pb', name: 'Lead', atomicMass: '207.2', group: 14, period: 6, family: 'Post-transition-metal', state: 'Solid', electronConfig: '[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p²', meltingPoint: '327°C', boilingPoint: '1749°C', electronegativity: '1.87', yearDiscovered: 'Ancient', discoverer: 'Known to ancients', x: 14, y: 6 },
+            'Bi': { atomicNumber: 83, symbol: 'Bi', name: 'Bismuth', atomicMass: '208.980', group: 15, period: 6, family: 'Post-transition-metal', state: 'Solid', electronConfig: '[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p³', meltingPoint: '271°C', boilingPoint: '1564°C', electronegativity: '2.02', yearDiscovered: 'Ancient', discoverer: 'Known to ancients', x: 15, y: 6 },
+            'Po': { atomicNumber: 84, symbol: 'Po', name: 'Polonium', atomicMass: '(209)', group: 16, period: 6, family: 'Post-transition-metal', state: 'Solid', electronConfig: '[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p⁴', meltingPoint: '254°C', boilingPoint: '962°C', electronegativity: '2.00', yearDiscovered: '1898', discoverer: 'Marie Curie', x: 16, y: 6 },
+            'At': { atomicNumber: 85, symbol: 'At', name: 'Astatine', atomicMass: '(210)', group: 17, period: 6, family: 'Halogen', state: 'Solid', electronConfig: '[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p⁵', meltingPoint: '302°C', boilingPoint: '337°C', electronegativity: '2.20', yearDiscovered: '1940', discoverer: 'Dale R. Corson', x: 17, y: 6 },
+            'Rn': { atomicNumber: 86, symbol: 'Rn', name: 'Radon', atomicMass: '(222)', group: 18, period: 6, family: 'Noble-gas', state: 'Gas', electronConfig: '[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p⁶', meltingPoint: '-71°C', boilingPoint: '-62°C', electronegativity: 'N/A', yearDiscovered: '1900', discoverer: 'Friedrich Ernst Dorn', x: 18, y: 6 },
+            'Fr': { atomicNumber: 87, symbol: 'Fr', name: 'Francium', atomicMass: '(223)', group: 1, period: 7, family: 'Alkali-metal', state: 'Solid', electronConfig: '[Rn] 7s¹', meltingPoint: '27°C', boilingPoint: '677°C', electronegativity: '0.70', yearDiscovered: '1939', discoverer: 'Marguerite Perey', x: 1, y: 7 },
+            'Ra': { atomicNumber: 88, symbol: 'Ra', name: 'Radium', atomicMass: '(226)', group: 2, period: 7, family: 'Alkaline-earth-metal', state: 'Solid', electronConfig: '[Rn] 7s²', meltingPoint: '700°C', boilingPoint: '1737°C', electronegativity: '0.90', yearDiscovered: '1898', discoverer: 'Marie Curie', x: 2, y: 7 },
+            'Lr': { atomicNumber: '89-103', symbol: '**', name: 'Actinides', family: 'Actinides', x: 3, y: 7 },
+            'Rf': { atomicNumber: 104, symbol: 'Rf', name: 'Rutherfordium', atomicMass: '(267)', group: 4, period: 7, family: 'Transition-metal', state: 'Solid', electronConfig: '[Rn] 5f¹⁴ 6d² 7s²', meltingPoint: '2100°C', boilingPoint: '5500°C', electronegativity: 'N/A', yearDiscovered: '1964', discoverer: 'Joint Institute for Nuclear Research', x: 4, y: 7 },
+            'Db': { atomicNumber: 105, symbol: 'Db', name: 'Dubnium', atomicMass: '(268)', group: 5, period: 7, family: 'Transition-metal', state: 'Solid', electronConfig: '[Rn] 5f¹⁴ 6d³ 7s²', meltingPoint: 'N/A', boilingPoint: 'N/A', electronegativity: 'N/A', yearDiscovered: '1968', discoverer: 'Joint Institute for Nuclear Research', x: 5, y: 7 },
+            'Sg': { atomicNumber: 106, symbol: 'Sg', name: 'Seaborgium', atomicMass: '(269)', group: 6, period: 7, family: 'Transition-metal', state: 'Solid', electronConfig: '[Rn] 5f¹⁴ 6d⁴ 7s²', meltingPoint: 'N/A', boilingPoint: 'N/A', electronegativity: 'N/A', yearDiscovered: '1974', discoverer: 'Joint Institute for Nuclear Research', x: 6, y: 7 },
+            'Bh': { atomicNumber: 107, symbol: 'Bh', name: 'Bohrium', atomicMass: '(270)', group: 7, period: 7, family: 'Transition-metal', state: 'Solid', electronConfig: '[Rn] 5f¹⁴ 6d⁵ 7s²', meltingPoint: 'N/A', boilingPoint: 'N/A', electronegativity: 'N/A', yearDiscovered: '1981', discoverer: 'Gesellschaft für Schwerionenforschung', x: 7, y: 7 },
+            'Hs': { atomicNumber: 108, symbol: 'Hs', name: 'Hassium', atomicMass: '(269)', group: 8, period: 7, family: 'Transition-metal', state: 'Solid', electronConfig: '[Rn] 5f¹⁴ 6d⁶ 7s²', meltingPoint: 'N/A', boilingPoint: 'N/A', electronegativity: 'N/A', yearDiscovered: '1984', discoverer: 'Gesellschaft für Schwerionenforschung', x: 8, y: 7 },
+            'Mt': { atomicNumber: 109, symbol: 'Mt', name: 'Meitnerium', atomicMass: '(278)', group: 9, period: 7, family: 'Undefined', state: 'Solid', electronConfig: '[Rn] 5f¹⁴ 6d⁷ 7s²', meltingPoint: 'N/A', boilingPoint: 'N/A', electronegativity: 'N/A', yearDiscovered: '1982', discoverer: 'Gesellschaft für Schwerionenforschung', x: 9, y: 7 },
+            'Ds': { atomicNumber: 110, symbol: 'Ds', name: 'Darmstadtium', atomicMass: '(281)', group: 10, period: 7, family: 'Undefined', state: 'Solid', electronConfig: '[Rn] 5f¹⁴ 6d⁸ 7s²', meltingPoint: 'N/A', boilingPoint: 'N/A', electronegativity: 'N/A', yearDiscovered: '1994', discoverer: 'Gesellschaft für Schwerionenforschung', x: 10, y: 7 },
+            'Rg': { atomicNumber: 111, symbol: 'Rg', name: 'Roentgenium', atomicMass: '(282)', group: 11, period: 7, family: 'Undefined', state: 'Solid', electronConfig: '[Rn] 5f¹⁴ 6d⁹ 7s²', meltingPoint: 'N/A', boilingPoint: 'N/A', electronegativity: 'N/A', yearDiscovered: '1994', discoverer: 'Gesellschaft für Schwerionenforschung', x: 11, y: 7 },
+            'Cn': { atomicNumber: 112, symbol: 'Cn', name: 'Copernicium', atomicMass: '(285)', group: 12, period: 7, family: 'Transition-metal', state: 'Solid', electronConfig: '[Rn] 5f¹⁴ 6d¹⁰ 7s²', meltingPoint: 'N/A', boilingPoint: 'N/A', electronegativity: 'N/A', yearDiscovered: '1996', discoverer: 'Gesellschaft für Schwerionenforschung', x: 12, y: 7 },
+            'Nh': { atomicNumber: 113, symbol: 'Nh', name: 'Nihonium', atomicMass: '(286)', group: 13, period: 7, family: 'Undefined', state: 'Solid', electronConfig: '[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p¹', meltingPoint: 'N/A', boilingPoint: 'N/A', electronegativity: 'N/A', yearDiscovered: '2004', discoverer: 'RIKEN', x: 13, y: 7 },
+            'Fl': { atomicNumber: 114, symbol: 'Fl', name: 'Flerovium', atomicMass: '(290)', group: 14, period: 7, family: 'Post-transition-metal', state: 'Solid', electronConfig: '[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p²', meltingPoint: 'N/A', boilingPoint: 'N/A', electronegativity: 'N/A', yearDiscovered: '1998', discoverer: 'Joint Institute for Nuclear Research', x: 14, y: 7 },
+            'Mc': { atomicNumber: 115, symbol: 'Mc', name: 'Moscovium', atomicMass: '(290)', group: 15, period: 7, family: 'Undefined', state: 'Solid', electronConfig: '[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p³', meltingPoint: 'N/A', boilingPoint: 'N/A', electronegativity: 'N/A', yearDiscovered: '2003', discoverer: 'Joint Institute for Nuclear Research', x: 15, y: 7 },
+            'Lv': { atomicNumber: 116, symbol: 'Lv', name: 'Livermorium', atomicMass: '(293)', group: 16, period: 7, family: 'Undefined', state: 'Solid', electronConfig: '[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p⁴', meltingPoint: 'N/A', boilingPoint: 'N/A', electronegativity: 'N/A', yearDiscovered: '2000', discoverer: 'Joint Institute for Nuclear Research', x: 16, y: 7 },
+            'Ts': { atomicNumber: 117, symbol: 'Ts', name: 'Tennessine', atomicMass: '(294)', group: 17, period: 7, family: 'Undefined', state: 'Solid', electronConfig: '[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p⁵', meltingPoint: 'N/A', boilingPoint: 'N/A', electronegativity: 'N/A', yearDiscovered: '2010', discoverer: 'Joint Institute for Nuclear Research', x: 17, y: 7 },
+            'Og': { atomicNumber: 118, symbol: 'Og', name: 'Oganesson', atomicMass: '(294)', group: 18, period: 7, family: 'Noble-gas', state: 'Gas', electronConfig: '[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p⁶', meltingPoint: 'N/A', boilingPoint: 'N/A', electronegativity: 'N/A', yearDiscovered: '2002', discoverer: 'Joint Institute for Nuclear Research', x: 18, y: 7 },
+            'Lanthanide_Placeholder_57': { atomicNumber: 57, symbol: 'La', name: 'Lanthanum', atomicMass: '138.905', group: 3, period: 6, family: 'Lanthanides', state: 'Solid', electronConfig: '[Xe] 5d¹ 6s²', meltingPoint: '920°C', boilingPoint: '3464°C', electronegativity: '1.10', yearDiscovered: '1839', discoverer: 'Carl Gustaf Mosander', x: 4, y: 9 },
+            'Lanthanide_Placeholder_58': { atomicNumber: 58, symbol: 'Ce', name: 'Cerium', atomicMass: '140.116', group: 4, period: 9, family: 'Lanthanides', state: 'Solid', electronConfig: '[Xe] 4f¹ 5d¹ 6s²', meltingPoint: '795°C', boilingPoint: '3443°C', electronegativity: '1.12', yearDiscovered: '1803', discoverer: 'Jöns Jacob Berzelius', x: 5, y: 9 },
+            'Lanthanide_Placeholder_59': { atomicNumber: 59, symbol: 'Pr', name: 'Praseodymium', atomicMass: '140.908', group: 5, period: 9, family: 'Lanthanides', state: 'Solid', electronConfig: '[Xe] 4f³ 6s²', meltingPoint: '935°C', boilingPoint: '3520°C', electronegativity: '1.13', yearDiscovered: '1885', discoverer: 'Carl Auer von Welsbach', x: 6, y: 9 },
+            'Lanthanide_Placeholder_60': { atomicNumber: 60, symbol: 'Nd', name: 'Neodymium', atomicMass: '144.242', group: 6, period: 9, family: 'Lanthanides', state: 'Solid', electronConfig: '[Xe] 4f⁴ 6s²', meltingPoint: '1021°C', boilingPoint: '3074°C', electronegativity: '1.14', yearDiscovered: '1885', discoverer: 'Carl Auer von Welsbach', x: 7, y: 9 },
+            'Lanthanide_Placeholder_61': { atomicNumber: 61, symbol: 'Pm', name: 'Promethium', atomicMass: '(145)', group: 7, period: 9, family: 'Lanthanides', state: 'Solid', electronConfig: '[Xe] 4f⁵ 6s²', meltingPoint: '1042°C', boilingPoint: '3000°C', electronegativity: '1.13', yearDiscovered: '1945', discoverer: 'Jacob A. Marinsky', x: 8, y: 9 },
+            'Lanthanide_Placeholder_62': { atomicNumber: 62, symbol: 'Sm', name: 'Samarium', atomicMass: '150.36', group: 8, period: 9, family: 'Lanthanides', state: 'Solid', electronConfig: '[Xe] 4f⁶ 6s²', meltingPoint: '1074°C', boilingPoint: '1794°C', electronegativity: '1.17', yearDiscovered: '1879', discoverer: 'Paul-Émile Lecoq de Boisbaudran', x: 9, y: 9 },
+            'Lanthanide_Placeholder_63': { atomicNumber: 63, symbol: 'Eu', name: 'Europium', atomicMass: '151.964', group: 9, period: 9, family: 'Lanthanides', state: 'Solid', electronConfig: '[Xe] 4f⁷ 6s²', meltingPoint: '822°C', boilingPoint: '1529°C', electronegativity: '1.20', yearDiscovered: '1901', discoverer: 'Eugène-Anatole Demarçay', x: 10, y: 9 },
+            'Lanthanide_Placeholder_64': { atomicNumber: 64, symbol: 'Gd', name: 'Gadolinium', atomicMass: '157.25', group: 10, period: 9, family: 'Lanthanides', state: 'Solid', electronConfig: '[Xe] 4f⁷ 5d¹ 6s²', meltingPoint: '1313°C', boilingPoint: '3273°C', electronegativity: '1.20', yearDiscovered: '1880', discoverer: 'Jean Charles Galissard de Marignac', x: 11, y: 9 },
+            'Lanthanide_Placeholder_65': { atomicNumber: 65, symbol: 'Tb', name: 'Terbium', atomicMass: '158.925', group: 11, period: 9, family: 'Lanthanides', state: 'Solid', electronConfig: '[Xe] 4f⁹ 6s²', meltingPoint: '1356°C', boilingPoint: '3230°C', electronegativity: '1.20', yearDiscovered: '1843', discoverer: 'Carl Gustaf Mosander', x: 12, y: 9 },
+            'Lanthanide_Placeholder_66': { atomicNumber: 66, symbol: 'Dy', name: 'Dysprosium', atomicMass: '162.500', group: 12, period: 9, family: 'Lanthanides', state: 'Solid', electronConfig: '[Xe] 4f¹⁰ 6s²', meltingPoint: '1412°C', boilingPoint: '2567°C', electronegativity: '1.22', yearDiscovered: '1886', discoverer: 'Paul-Émile Lecoq de Boisbaudran', x: 13, y: 9 },
+            'Lanthanide_Placeholder_67': { atomicNumber: 67, symbol: 'Ho', name: 'Holmium', atomicMass: '164.930', group: 13, period: 9, family: 'Lanthanides', state: 'Solid', electronConfig: '[Xe] 4f¹¹ 6s²', meltingPoint: '1474°C', boilingPoint: '2720°C', electronegativity: '1.23', yearDiscovered: '1878', discoverer: 'Jacques-Louis Soret', x: 14, y: 9 },
+            'Lanthanide_Placeholder_68': { atomicNumber: 68, symbol: 'Er', name: 'Erbium', atomicMass: '167.259', group: 14, period: 9, family: 'Lanthanides', state: 'Solid', electronConfig: '[Xe] 4f¹² 6s²', meltingPoint: '1529°C', boilingPoint: '2868°C', electronegativity: '1.24', yearDiscovered: '1843', discoverer: 'Carl Gustaf Mosander', x: 15, y: 9 },
+            'Lanthanide_Placeholder_69': { atomicNumber: 69, symbol: 'Tm', name: 'Thulium', atomicMass: '168.934', group: 15, period: 9, family: 'Lanthanides', state: 'Solid', electronConfig: '[Xe] 4f¹³ 6s²', meltingPoint: '1545°C', boilingPoint: '1950°C', electronegativity: '1.25', yearDiscovered: '1879', discoverer: 'Per Teodor Cleve', x: 16, y: 9 },
+            'Lanthanide_Placeholder_70': { atomicNumber: 70, symbol: 'Yb', name: 'Ytterbium', atomicMass: '173.045', group: 16, period: 9, family: 'Lanthanides', state: 'Solid', electronConfig: '[Xe] 4f¹⁴ 6s²', meltingPoint: '819°C', boilingPoint: '1196°C', electronegativity: '1.10', yearDiscovered: '1878', discoverer: 'Jean Charles Galissard de Marignac', x: 17, y: 9 },
+            'Lanthanide_Placeholder_71': { atomicNumber: 71, symbol: 'Lu', name: 'Lutetium', atomicMass: '174.967', group: 17, period: 9, family: 'Lanthanides', state: 'Solid', electronConfig: '[Xe] 4f¹⁴ 5d¹ 6s²', meltingPoint: '1663°C', boilingPoint: '3402°C', electronegativity: '1.27', yearDiscovered: '1907', discoverer: 'Georges Urbain', x: 18, y: 9 },
+            'Actinide_Placeholder_89': { atomicNumber: 89, symbol: 'Ac', name: 'Actinium', atomicMass: '(227)', group: 3, period: 10, family: 'Actinides', state: 'Solid', electronConfig: '[Rn] 6d¹ 7s²', meltingPoint: '1050°C', boilingPoint: '3198°C', electronegativity: '1.10', yearDiscovered: '1899', discoverer: 'André-Louis Debierne', x: 4, y: 10 },
+            'Actinide_Placeholder_90': { atomicNumber: 90, symbol: 'Th', name: 'Thorium', atomicMass: '232.038', group: 4, period: 10, family: 'Actinides', state: 'Solid', electronConfig: '[Rn] 6d² 7s²', meltingPoint: '1750°C', boilingPoint: '4788°C', electronegativity: '1.30', yearDiscovered: '1828', discoverer: 'Jöns Jacob Berzelius', x: 5, y: 10 },
+            'Actinide_Placeholder_91': { atomicNumber: 91, symbol: 'Pa', name: 'Protactinium', atomicMass: '231.036', group: 5, period: 10, family: 'Actinides', state: 'Solid', electronConfig: '[Rn] 5f² 6d¹ 7s²', meltingPoint: '1568°C', boilingPoint: '4027°C', electronegativity: '1.50', yearDiscovered: '1913', discoverer: 'Kasimir Fajans and Oswald Göhring', x: 6, y: 10 },
+            'Actinide_Placeholder_92': { atomicNumber: 92, symbol: 'U', name: 'Uranium', atomicMass: '238.029', group: 6, period: 10, family: 'Actinides', state: 'Solid', electronConfig: '[Rn] 5f³ 6d¹ 7s²', meltingPoint: '1132°C', boilingPoint: '4131°C', electronegativity: '1.38', yearDiscovered: '1789', discoverer: 'Martin Heinrich Klaproth', x: 7, y: 10 },
+            'Actinide_Placeholder_93': { atomicNumber: 93, symbol: 'Np', name: 'Neptunium', atomicMass: '(237)', group: 7, period: 10, family: 'Actinides', state: 'Solid', electronConfig: '[Rn] 5f⁴ 6d¹ 7s²', meltingPoint: '639°C', boilingPoint: '4174°C', electronegativity: '1.36', yearDiscovered: '1940', discoverer: 'Edwin McMillan and Philip Abelson', x: 8, y: 10 },
+            'Actinide_Placeholder_94': { atomicNumber: 94, symbol: 'Pu', name: 'Plutonium', atomicMass: '(244)', group: 8, period: 10, family: 'Actinides', state: 'Solid', electronConfig: '[Rn] 5f⁶ 7s²', meltingPoint: '640°C', boilingPoint: '3228°C', electronegativity: '1.28', yearDiscovered: '1940', discoverer: 'Glenn T. Seaborg', x: 9, y: 10 },
+            'Actinide_Placeholder_95': { atomicNumber: 95, symbol: 'Am', name: 'Americium', atomicMass: '(243)', group: 9, period: 10, family: 'Actinides', state: 'Solid', electronConfig: '[Rn] 5f⁷ 7s²', meltingPoint: '1176°C', boilingPoint: '2607°C', electronegativity: '1.30', yearDiscovered: '1944', discoverer: 'Glenn T. Seaborg', x: 10, y: 10 },
+            'Actinide_Placeholder_96': { atomicNumber: 96, symbol: 'Cm', name: 'Curium', atomicMass: '(247)', group: 10, period: 10, family: 'Actinides', state: 'Solid', electronConfig: '[Rn] 5f⁷ 6d¹ 7s²', meltingPoint: '1340°C', boilingPoint: '3100°C', electronegativity: '1.30', yearDiscovered: '1944', discoverer: 'Glenn T. Seaborg', x: 11, y: 10 },
+            'Actinide_Placeholder_97': { atomicNumber: 97, symbol: 'Bk', name: 'Berkelium', atomicMass: '(247)', group: 11, period: 10, family: 'Actinides', state: 'Solid', electronConfig: '[Rn] 5f⁹ 7s²', meltingPoint: '986°C', boilingPoint: '2627°C', electronegativity: '1.30', yearDiscovered: '1949', discoverer: 'Glenn T. Seaborg', x: 12, y: 10 },
+            'Actinide_Placeholder_98': { atomicNumber: 98, symbol: 'Cf', name: 'Californium', atomicMass: '(251)', group: 12, period: 10, family: 'Actinides', state: 'Solid', electronConfig: '[Rn] 5f¹⁰ 7s²', meltingPoint: '900°C', boilingPoint: '1470°C', electronegativity: '1.30', yearDiscovered: '1950', discoverer: 'Glenn T. Seaborg', x: 13, y: 10 },
+            'Actinide_Placeholder_99': { atomicNumber: 99, symbol: 'Es', name: 'Einsteinium', atomicMass: '(252)', group: 13, period: 10, family: 'Actinides', state: 'Solid', electronConfig: '[Rn] 5f¹¹ 7s²', meltingPoint: '860°C', boilingPoint: 'N/A', electronegativity: '1.30', yearDiscovered: '1952', discoverer: 'Albert Ghiorso', x: 14, y: 10 },
+            'Actinide_Placeholder_100': { atomicNumber: 100, symbol: 'Fm', name: 'Fermium', atomicMass: '(257)', group: 14, period: 10, family: 'Actinides', state: 'Solid', electronConfig: '[Rn] 5f¹² 7s²', meltingPoint: '1527°C', boilingPoint: 'N/A', electronegativity: '1.30', yearDiscovered: '1952', discoverer: 'Albert Ghiorso', x: 15, y: 10 },
+            'Actinide_Placeholder_101': { atomicNumber: 101, symbol: 'Md', name: 'Mendelevium', atomicMass: '(258)', group: 15, period: 10, family: 'Actinides', state: 'Solid', electronConfig: '[Rn] 5f¹³ 7s²', meltingPoint: '827°C', boilingPoint: 'N/A', electronegativity: '1.30', yearDiscovered: '1955', discoverer: 'Albert Ghiorso', x: 16, y: 10 },
+            'Actinide_Placeholder_102': { atomicNumber: 102, symbol: 'No', name: 'Nobelium', atomicMass: '(259)', group: 16, period: 10, family: 'Actinides', state: 'Solid', electronConfig: '[Rn] 5f¹⁴ 7s²', meltingPoint: '827°C', boilingPoint: 'N/A', electronegativity: '1.30', yearDiscovered: '1966', discoverer: 'Georgy Flerov', x: 17, y: 10 },
+            'Actinide_Placeholder_103': { atomicNumber: 103, symbol: 'Lr', name: 'Lawrencium', atomicMass: '(262)', group: 17, period: 10, family: 'Actinides', state: 'Solid', electronConfig: '[Rn] 5f¹⁴ 6d¹ 7s²', meltingPoint: '1627°C', boilingPoint: 'N/A', electronegativity: '1.30', yearDiscovered: '1961', discoverer: 'Albert Ghiorso', x: 18, y: 10 },
+            'La_placeholder': { atomicNumber: '57-71', symbol: 'La-Lu', name: 'Lanthanoids', family: 'Lanthanides', x: 3, y: 6 },
+            'Ac_placeholder': { atomicNumber: '89-103', symbol: 'Ac-Lr', name: 'Actinoids', family: 'Actinides', x: 3, y: 7 },
+        };
+
+        const totalRows = 10;
+        const totalColumns = 18;
+        const table = document.getElementById('periodic-table');
+        const modal = document.getElementById('elementModal');
+        const closeBtn = document.querySelector('.close');
+        const modalHeader = document.querySelector('.modal-header');
+        let currentFilter = null;
+        
+        // Map element family to its corresponding gradient
+        const familyGradients = {
+            'alkali-metal': 'linear-gradient(135deg, #FF6666, #FF8080)',
+            'alkaline-earth-metal': 'linear-gradient(135deg, #FFD54F, #FFECB3)',
+            'transition-metal': 'linear-gradient(135deg, #4DD0E1, #B2EBF2)',
+            'post-transition-metal': 'linear-gradient(135deg, #A1887F, #BCAAA4)',
+            'metalloid': 'linear-gradient(135deg, #81C784, #A5D6A7)',
+            'nonmetal': 'linear-gradient(135deg, #9575CD, #B39DDB)',
+            'halogen': 'linear-gradient(135deg, #FFB74D, #FFCC80)',
+            'noble-gas': 'linear-gradient(135deg, #DCE775, #E6EE9C)',
+            'lanthanides': 'linear-gradient(135deg, #F06292, #F48FB1)',
+            'actinides': 'linear-gradient(135deg, #00BFA5, #26A69A)',
+            'undefined': 'linear-gradient(135deg, #B0BEC5, #CFD8DC)'
+        };
+
+        function createTable() {
+            for (let i = 0; i < totalRows; i++) {
+                const row = document.createElement('tr');
+                for (let j = 0; j < totalColumns; j++) {
+                    const cell = document.createElement('td');
+                    row.appendChild(cell);
+                }
+                table.appendChild(row);
+            }
+        }
+        
+        function populateTable() {
+            const cells = table.getElementsByTagName('td');
+            Object.values(elementData).forEach(data => {
+                let x = data.x;
+                let y = data.y;
+                
+                const cellIndex = (x - 1) + (y - 1) * totalColumns;
+                const cell = cells[cellIndex];
+                
+                if (cell) {
+                    cell.innerHTML = `<div>${data.symbol}</div>`;
+                    cell.classList.add(data.family.toLowerCase().replace(/[\s-]/g, '-'));
+                    cell.dataset.symbol = data.symbol;
+                    cell.dataset.family = data.family.toLowerCase().replace(/[\s-]/g, '-');
+                    
+                    // Only add click listener if it's a real element
+                    if (!data.name.includes('Placeholder')) {
+                         cell.addEventListener('click', () => showElementModal(data));
+                    }
+                }
+            });
+        }
+        
+        function showElementModal(data) {
+            document.getElementById('modalTitle').textContent = `${data.name} (${data.symbol})`;
+            document.getElementById('atomicNumber').textContent = data.atomicNumber;
+            document.getElementById('atomicMass').textContent = data.atomicMass;
+            document.getElementById('group').textContent = data.group;
+            document.getElementById('period').textContent = data.period;
+            document.getElementById('family').textContent = data.family;
+            document.getElementById('state').textContent = data.state;
+            document.getElementById('electronConfig').textContent = data.electronConfig;
+            document.getElementById('meltingPoint').textContent = data.meltingPoint;
+            document.getElementById('boilingPoint').textContent = data.boilingPoint;
+            document.getElementById('electronegativity').textContent = data.electronegativity;
+            document.getElementById('yearDiscovered').textContent = data.yearDiscovered;
+            document.getElementById('discoverer').textContent = data.discoverer;
+
+            // Apply the new gradient based on the element's family
+            const familyClass = data.family.toLowerCase().replace(/[\s-]/g, '-');
+            modalHeader.style.background = familyGradients[familyClass] || 'linear-gradient(135deg, #e0eafc, #cfdef3)';
+
+            modal.style.display = 'flex';
+        }
+        
+        function closeModal() {
+            modal.style.display = 'none';
+        }
+
+        function initializeLegend() {
+            const legendItems = document.querySelectorAll('.legend-item');
+            
+            legendItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const family = this.dataset.family;
+                    
+                    if (currentFilter === family) {
+                        currentFilter = null;
+                        this.classList.remove('active');
+                        resetElementVisibility();
+                    } else {
+                        currentFilter = family;
+                        legendItems.forEach(li => li.classList.remove('active'));
+                        this.classList.add('active');
+                        filterElements(family);
+                    }
+                });
+            });
+        }
+        
+        function filterElements(family) {
+            const cells = table.getElementsByTagName('td');
+            Array.from(cells).forEach(cell => {
+                if (cell.dataset.family) {
+                    if (cell.dataset.family === family) {
+                        cell.classList.remove('dimmed');
+                    } else {
+                        cell.classList.add('dimmed');
+                    }
+                }
+            });
+        }
+        
+        function resetElementVisibility() {
+            const cells = table.getElementsByTagName('td');
+            Array.from(cells).forEach(cell => {
+                cell.classList.remove('dimmed');
+            });
+        }
+
+        function handleResize() {
+            const isMobile = window.innerWidth <= 768;
+            const cells = table.getElementsByTagName('td');
+            Array.from(cells).forEach(cell => {
+                if (isMobile) {
+                    cell.style.fontSize = '10px';
+                } else {
+                    cell.style.fontSize = '14px';
+                }
+            });
+        }
+
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            createTable();
+            populateTable();
+            initializeLegend();
+            closeBtn.addEventListener('click', closeModal);
+            window.addEventListener('click', (event) => {
+                if (event.target === modal) {
+                    closeModal();
+                }
+            });
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape' && modal.style.display === 'flex') {
+                    closeModal();
+                }
+            });
+            window.addEventListener('resize', debounce(handleResize, 250));
+            handleResize();
+        });
+    </script>
 </body>
 </html>
